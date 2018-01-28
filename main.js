@@ -25,9 +25,9 @@ function addBlock(x,y,z,dx,dy,dz,f){
   scene.add(b.cube);
   blocks.push(b);
 }
-function joinBlock(direction,length,depth,width,changeInY,changeInD,f){
+function joinBlock(b,direction,length,depth,width,changeInY,changeInD,f){
   if(direction == -1){
-    var b1 = blocks[blocks.length-1];
+    var b1 = b;
     var d1 = b1.direction;
     if(d1 == 0){
       var b2 = new Block(b1.p.x-b1.d.x/2-length/2-changeInD,b1.p.y+changeInY+b1.d.y/2-depth/2,b1.p.z-b1.d.z/2+width/2,length,depth,width);
@@ -43,7 +43,7 @@ function joinBlock(direction,length,depth,width,changeInY,changeInD,f){
       b2.direction = 2;
     }
   }else if(direction == 1){
-    var b1 = blocks[blocks.length-1];
+    var b1 = b;
     var d1 = b1.direction;
     if(d1 == 0){
       var b2 = new Block(b1.p.x+b1.d.x/2+length/2+changeInD,b1.p.y+changeInY+b1.d.y/2-depth/2,b1.p.z-b1.d.z/2+width/2,length,depth,width);
@@ -59,7 +59,7 @@ function joinBlock(direction,length,depth,width,changeInY,changeInD,f){
       b2.direction = 0;
     }
   }else if(direction == 0){
-    var b1 = blocks[blocks.length-1];
+    var b1 = b;
     var d1 = b1.direction;
     if(d1 == 0){
       var b2 = new Block(b1.p.x,b1.p.y+changeInY+b1.d.y/2-depth/2,b1.p.z-b1.d.z/2-length/2-changeInD,width,depth,length);
@@ -84,8 +84,8 @@ function joinBlock(direction,length,depth,width,changeInY,changeInD,f){
   scene.add(b2.cube);
   blocks.push(b2);
 }
-function turnO(space,length,height,f){
-  var b1 = blocks[blocks.length-1];
+function turnO(b,space,length,height,f){
+  var b1 = b;
   var d1 = b1.direction;
   if(d1 == 0 || d1 == 2){
     var b2 = new Block(b1.p.x+b1.d.x/2+length/2,b1.p.y+height/2,b1.p.z,length,height,b1.d.x-2*space);
@@ -106,26 +106,21 @@ function turnO(space,length,height,f){
   blocks.push(b3);
 }
 /////// Blocks /////
-
-// joinBlock parameters: direction,length,depth,width,changeInY,changeInD,f
-// turnO parameters: space,length,height,f
-var l1 = 17, w1 = 4, d1 = 20;
-function f1(p){
-  p.c = 0xFFFFFF;
-}
-addBlock(0,-22,-2,w1,d1,l1*4);
-joinBlock(-1,l1,d1,w1,0,0,f1);
-joinBlock(1,l1,d1,w1,0,0,f1);
-joinBlock(-1,l1,d1,w1,0,0,f1);
-joinBlock(1,l1,d1,w1,0,0,f1);
-joinBlock(-1,l1,d1,w1,0,0,f1);
-joinBlock(1,l1,d1,w1,0,0,f1);
-joinBlock(-1,l1,d1,w1,0,0,f1);
-joinBlock(1,l1,d1,w1,0,0,f1);
-joinBlock(-1,l1,d1,w1,0,0,f1);
-joinBlock(1,l1,d1,w1,0,0,f1);
-joinBlock(-1,l1,d1,w1,0,0,f1);
-joinBlock(1,l1,d1,w1,0,0,f1);
+/*
+joinBlock parameters:    b,direction,length,depth,width,changeInY,changeInD,f
+turnO parameters:        b,space,length,height,f
+addBlock parameters:     x,y,z,dx,dy,dz,f
+*/
+var l1 = 30, w1 = 2, d1 = 40;
+var sy = -75;
+function f1(p){p.c = 0x110706;}
+function f2(p){p.c = 0x161206;}
+addBlock(0,sy-d1/2,-200,500,10,1500,f2);
+addBlock(0,sy,-46,w1,d1,l1*3,f1);
+joinBlock(blocks[blocks.length-1],-1,l1,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],1,l1,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],-1,l1,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],1,l1,d1,w1,0,0,f1);
 //////////////////////
 window.onmousedown = turn;
 window.ontouchstart = turn;
@@ -143,17 +138,25 @@ function autoCam(){
   camera.position.z+=(line.p.z+8-camera.position.z)*0.03;
   camera.position.y = line.p.y+20;
 }
-var directionalLight = new THREE.DirectionalLight(0xFFFFFF,0.6);
+var directionalLight = new THREE.DirectionalLight(0xFFFFFF,3/4);
 directionalLight.position.set(-1,1,1);
 directionalLight.castShadow = true;
 scene.add(directionalLight);
 
-var directionalLight = new THREE.DirectionalLight(0xFFFFFF,0.6);
+var directionalLight = new THREE.DirectionalLight(0xFFFFFF,3/4);
 directionalLight.position.set(1,1,-1);
 directionalLight.castShadow = true;
 scene.add(directionalLight);
+
 var dtime;
+
+var pg = new Particle3System(scene);
+pg.gravity = -0.1;
 function animate() {
+  var p = new Particle3(-10,-80,-50);
+  p.v = new THREE.Vector3(random(-0.3,0.3),1,random(-0.3,0.3))
+  pg.addParticle(p);
+  pg.update();
   line.update();
   dtime = Date.now()-StartTime;
   autoCam();
@@ -177,7 +180,7 @@ function animate() {
     if(xin && yin && zin){
       b.hit = true;
       hitP++;
-      if(b.kill || l.p.y<b.p.y+b.d.y/2){
+      if(b.kill || !(l.p.y>b.p.y+b.d.y/2)){
         dead = true;
       }else{
         line.v.y = 0;

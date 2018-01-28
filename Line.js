@@ -16,6 +16,8 @@ function Line(d,vt){
 	this.v.set(0,0,-vt);
 }
 Line.prototype.update = function() {
+	this.material = new THREE.MeshLambertMaterial({color:this.c});
+	this.cube.material = this.material;
 	this.p.addVectors(this.p,this.v);
 	this.cube.position.set(this.p.x,this.p.y,this.p.z);
 	this.cube.scale.set(this.d.x,this.d.y,this.d.z);
