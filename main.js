@@ -3,14 +3,16 @@ var container =
    document.querySelector('#container');
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(ww,hh);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 var camera = new THREE.PerspectiveCamera(75,ww/hh,1,1e10);
 var scene = new THREE.Scene();
 camera.position.set(0,900,0);
 scene.add(camera);
 
 var dead = false, win = false;
-const g = -0.15;
-var line = new Line(30,4);
+const g = -0.015;
+var line = new Line(1,0.35);
 scene.add(line.cube);
 
 const StartTime = Date.now();
@@ -77,6 +79,8 @@ function joinBlock(direction,length,depth,width,changeInY,changeInD,f){
     return;
   }
   if(f) f(b2);
+  b2.cube.castShadow = true;
+  b2.cube.receiveShadow = true;
   scene.add(b2.cube);
   blocks.push(b2);
 }
@@ -105,50 +109,52 @@ function turnO(space,length,height,f){
 
 // joinBlock parameters: direction,length,depth,width,changeInY,changeInD,f
 // turnO parameters: space,length,height,f
-var l1 = 780, w1 = 180;
-addBlock(0,-200,-200,70,100,1000);
-joinBlock(-1,l1,15,w1,0,0);
-joinBlock(1,l1,15,w1,0,0);
-joinBlock(-1,l1,15,w1,0,0);
-joinBlock(1,l1,15,w1,0,0);
-joinBlock(-1,l1,15,w1,0,0);
-joinBlock(-1,l1,15,w1,0,0);
-joinBlock(1,l1,15,w1,0,0);
-joinBlock(-1,l1,15,w1,0,0);
-joinBlock(1,l1,15,w1,0,0);
-joinBlock(-1,l1,15,w1,0,0);
-joinBlock(1,l1,15,w1,0,0);
-joinBlock(1,l1,15,w1,0,0);
+var l1 = 17, w1 = 4, d1 = 20;
+function f1(p){
+  p.materal = new THREE.MeshLambertMaterial({color:this.c});
+}
+addBlock(0,-22,-2,w1,d1,l1*4);
+joinBlock(-1,l1,d1,w1,0,0,f1);
+joinBlock(1,l1,d1,w1,0,0,f1);
+joinBlock(-1,l1,d1,w1,0,0,f1);
+joinBlock(1,l1,d1,w1,0,0,f1);
+joinBlock(-1,l1,d1,w1,0,0,f1);
+joinBlock(1,l1,d1,w1,0,0,f1);
+joinBlock(-1,l1,d1,w1,0,0,f1);
+joinBlock(1,l1,d1,w1,0,0,f1);
+joinBlock(-1,l1,d1,w1,0,0,f1);
+joinBlock(1,l1,d1,w1,0,0,f1);
+joinBlock(-1,l1,d1,w1,0,0,f1);
+joinBlock(1,l1,d1,w1,0,0,f1);
 //////////////////////
 window.onmousedown = turn;
 window.ontouchstart = turn;
 function turn(){
   if(!line.inAir){
     var d = line.direction;
-    if(d == 0) line.direction = 3;
-    else if(d == 3) line.direction = 0;
+    if(d == 0){line.direction = 3;
+    }else if(d == 3){line.direction = 0;}
   }
 }
 function autoCam(){
   camera.rotation.x = -Math.PI/4;
   camera.rotation.z = Math.PI/4;
-  camera.position.x+=(line.p.x+100-camera.position.x)*0.05;
-  camera.position.z+=(line.p.z+100-camera.position.z)*0.05;
-  camera.position.y = line.p.y+300;
+  camera.position.x+=(line.p.x+0.5-camera.position.x)*0.03;
+  camera.position.z+=(line.p.z+8-camera.position.z)*0.03;
+  camera.position.y = line.p.y+20;
 }
-function lights(n){
-  for(var i=0;i<n;i++){
-    var pointLight = new THREE.PointLight(0xFFFFFF);
-    pointLight.position.set(Math.random()*1000,4000,Math.random()*1000);
-    scene.add(pointLight);
-  }
-}
-lights(3);
+var directionalLight = new THREE.DirectionalLight(0xFFFFFF,1,100);
+directionalLight.position.set(-1,1,1);
+directionalLight.castShadow = true;
+scene.add(directionalLight);
+
+var directionalLight = new THREE.DirectionalLight(0xFFFFFF,1);
+directionalLight.position.set(1,1,-1);
+directionalLight.castShadow = true;
+scene.add(directionalLight);
 var dtime;
-function dist3(p1,p2){
-  return Math.sqrt(Math.pow(p2.x-p1.x,2)+Math.pow(p2.y-p1.y,2)+Math.pow(p2.z-p1.z,2))
-}
 function animate() {
+  line.update();
   dtime = Date.now()-StartTime;
   autoCam();
   if(!line.inAir){
@@ -157,6 +163,8 @@ function animate() {
     var cube = new THREE.Mesh(geometry,material);
     cube.scale.set(line.d.x,line.d.y,line.d.z);
     cube.position.set(line.p.x,line.p.y,line.p.z);
+    cube.castShadow = true;
+    cube.receiveShadow = true;
     scene.add(cube);
   }
   var hitP = 0;
@@ -169,7 +177,7 @@ function animate() {
     if(xin && yin && zin){
       b.hit = true;
       hitP++;
-      if(b.kill){
+      if(b.kill || l.p.y<b.p.y+b.d.y/2){
         dead = true;
       }else{
         line.v.y = 0;
@@ -180,9 +188,11 @@ function animate() {
     }
     b.update();
   }
-  if(hitP<=0) line.inAir = true;
-  else line.inAir = false;;
-  line.update();
+  if(hitP<=0){
+    line.inAir = true;
+  }else{
+    line.inAir = false;
+  }
   line.v.y+=g;
   requestAnimationFrame(animate);
   renderer.render(scene,camera);

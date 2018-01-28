@@ -67,16 +67,16 @@ Point3.prototype.normalize = function() {
 // other
 Point3.mag = function(p){
 	return mag3(p.x,p.y,p.z);
-}
+};
 Point3.copy = function(a,b){
 	b.x = a.x;
 	b.y = a.y;
 	b.z = a.z;
-}
+};
 Point3.normalize = function(p){
 	var n = Point3.mag(p);
 	return new Point(p.x/n,p.y/n,p.z/n);
-}
+};
 // 2D
 function Point2(x,y){
 	this.x = x || 0;
@@ -106,7 +106,8 @@ Point2.prototype.floor = function(p) {
 Point2.prototype.round = function(p) {
 	this.x = Math.round(this.x);
 	this.y = Math.round(this.y);
-Point2Point3.prototype.ceil = function(p) {
+};
+Point2.prototype.ceil = function(p) {
 	this.x = Math.ceil(this.x);
 	this.y = Math.ceil(this.y);
 };
@@ -121,15 +122,15 @@ Point2.prototype.normalize = function() {
 // other
 Point2.mag = function(p){
 	return mag2(p.x,p.y);
-}
+};
 Point2.normalize = function(p){
 	var n = Point2.mag(p);
 	return new Point(p.x/n,p.y/n);
-}
+};
 Point3.copy = function(a,b){
 	b.x = a.x;
 	b.y = a.y;
-}
+};
 Point2.heading = function(p){
 	return Math.atan2(p.y,p.x);
-}
+};
