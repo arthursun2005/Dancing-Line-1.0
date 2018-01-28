@@ -1,9 +1,9 @@
-function Block(x,y,z,dx,dy,dz){
+function Block(x,y,z,dx,dy,dz,c){
 	this.p = new THREE.Vector3();
 	this.v = new THREE.Vector3();
 	this.d = new THREE.Vector3();
 	this.direction = 0;
-	this.c = 0x777722;
+	this.c = c || 0x987654;
 	this.kill = false;
 	this.hit = false;
 	this.f = null;
@@ -17,6 +17,8 @@ function Block(x,y,z,dx,dy,dz){
 }
 Block.prototype.update = function() {
 	if(this.f) this.f();
+	this.material = new THREE.MeshLambertMaterial({color:this.c});
+	this.cube.material = this.material;
 	this.p.addVectors(this.p,this.v);
 	this.cube.position.set(this.p.x,this.p.y,this.p.z);
 	this.cube.scale.set(this.d.x,this.d.y,this.d.z);

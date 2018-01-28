@@ -35,6 +35,13 @@ function Particle3System(scene){
 	this.ps = [];
 	this.scene = scene;
 }
+Particle3System.prototype.addParticle = function(p) {
+	this.scene.push(p.sphere);
+	this.ps.push(p);
+};
+Particle3System.prototype.update = function() {
+	// body...
+};
 Particle3System.prototype.update = function() {
 	// body...
 };

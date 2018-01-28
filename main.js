@@ -111,7 +111,7 @@ function turnO(space,length,height,f){
 // turnO parameters: space,length,height,f
 var l1 = 17, w1 = 4, d1 = 20;
 function f1(p){
-  p.materal = new THREE.MeshLambertMaterial({color:this.c});
+  p.c = 0xFFFFFF;
 }
 addBlock(0,-22,-2,w1,d1,l1*4);
 joinBlock(-1,l1,d1,w1,0,0,f1);
@@ -143,12 +143,12 @@ function autoCam(){
   camera.position.z+=(line.p.z+8-camera.position.z)*0.03;
   camera.position.y = line.p.y+20;
 }
-var directionalLight = new THREE.DirectionalLight(0xFFFFFF,1,100);
+var directionalLight = new THREE.DirectionalLight(0xFFFFFF,0.6);
 directionalLight.position.set(-1,1,1);
 directionalLight.castShadow = true;
 scene.add(directionalLight);
 
-var directionalLight = new THREE.DirectionalLight(0xFFFFFF,1);
+var directionalLight = new THREE.DirectionalLight(0xFFFFFF,0.6);
 directionalLight.position.set(1,1,-1);
 directionalLight.castShadow = true;
 scene.add(directionalLight);
