@@ -4,7 +4,7 @@ function Line(d,vt){
 	this.v = new THREE.Vector3();
 	this.d = new THREE.Vector3();
 	this.inAir = true;
-	this.c = 0xFFAA00;
+	this.c = 0x993201;
 	this.dv = vt;
 	this.dead = false;
 	this.geometry = new THREE.BoxGeometry(1,1,1);

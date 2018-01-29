@@ -12,7 +12,7 @@ scene.add(camera);
 
 var dead = false, win = false;
 const g = -0.015;
-var line = new Line(1,0.35);
+var line = new Line(1,0.4);
 scene.add(line.cube);
 
 const StartTime = Date.now();
@@ -22,8 +22,10 @@ var blocks = [];
 function addBlock(x,y,z,dx,dy,dz,f){
   var b = new Block(x,y,z,dx,dy,dz);
   if(f) f(b);
-  scene.add(b.cube);
+  b.cube.castShadow = false;
+  b.cube.receiveShadow = true;
   blocks.push(b);
+  scene.add(b.cube);
 }
 function joinBlock(b,direction,length,depth,width,changeInY,changeInD,f){
   if(direction == -1){
@@ -81,8 +83,8 @@ function joinBlock(b,direction,length,depth,width,changeInY,changeInD,f){
   if(f) f(b2);
   b2.cube.castShadow = true;
   b2.cube.receiveShadow = true;
-  scene.add(b2.cube);
   blocks.push(b2);
+  scene.add(b2.cube);
 }
 function turnO(b,space,length,height,f){
   var b1 = b;
@@ -98,12 +100,12 @@ function turnO(b,space,length,height,f){
   b3.kill = true;
 
   if(f) f(b2);
-  scene.add(b2.cube);
   blocks.push(b2);
+  scene.add(b2.cube);
 
   if(f) f(b3);
-  scene.add(b3.cube);
   blocks.push(b3);
+  scene.add(b3.cube);
 }
 /////// Blocks /////
 /*
@@ -111,12 +113,35 @@ joinBlock parameters:    b,direction,length,depth,width,changeInY,changeInD,f
 turnO parameters:        b,space,length,height,f
 addBlock parameters:     x,y,z,dx,dy,dz,f
 */
-var l1 = 30, w1 = 2, d1 = 40;
+var l1 = 30, w1 = 2, d1 = 20;
 var sy = -75;
 function f1(p){p.c = 0x110706;}
-function f2(p){p.c = 0x161206;}
-addBlock(0,sy-d1/2,-200,500,10,1500,f2);
-addBlock(0,sy,-46,w1,d1,l1*3,f1);
+function f2(p){p.c = 0x161206;p.kill = true;}
+function f3(p){p.c = 0x111111;p.kill = true;}
+addBlock(0,sy-d1/2,-200,500,10,1000,f2);
+for(var i=0;i<50;i++){
+  var x = random(-150,150);
+  var z = random(-500,100);
+  var dx = random(10,120);
+  var dy = random(5,25);
+  var dz = random(10,120);
+  addBlock(x,sy-d1/2,z,dx,dy,dz,f3);
+}
+var step = {
+  up: function(){
+  },
+  down: function(){
+  }
+}
+addBlock(0,sy,-50,w1,d1,l1*3,f1);
+joinBlock(blocks[blocks.length-1],-1,l1,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],1,l1,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],-1,l1,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],1,l1,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],-1,l1,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],1,l1,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],-1,l1,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],1,l1,d1,w1,0,0,f1);
 joinBlock(blocks[blocks.length-1],-1,l1,d1,w1,0,0,f1);
 joinBlock(blocks[blocks.length-1],1,l1,d1,w1,0,0,f1);
 joinBlock(blocks[blocks.length-1],-1,l1,d1,w1,0,0,f1);
@@ -138,27 +163,47 @@ function autoCam(){
   camera.position.z+=(line.p.z+8-camera.position.z)*0.03;
   camera.position.y = line.p.y+20;
 }
-var directionalLight = new THREE.DirectionalLight(0xFFFFFF,3/4);
-directionalLight.position.set(-1,1,1);
-directionalLight.castShadow = true;
-scene.add(directionalLight);
 
-var directionalLight = new THREE.DirectionalLight(0xFFFFFF,3/4);
-directionalLight.position.set(1,1,-1);
-directionalLight.castShadow = true;
-scene.add(directionalLight);
+var light = new THREE.DirectionalLight(0xFFFFFF,1);
+light.position.set(1,1,-1);
+scene.add(light);
+
+var light = new THREE.PointLight(0xFFDDDD,1/2);
+light.position.set(-10,300,-300);
+
+light.castShadow = true;
+//light.shadowDarkness = 0.1;
+//light.shadowCameraVisible = true;
+
+scene.add(light);
+
+var light = new THREE.PointLight(0xFF9999,1/2);
+light.position.set(10,300,100);
+
+light.castShadow = true;
+//light.shadowDarkness = 0.1;
+//light.shadowCameraVisible = true;
+scene.add(light);
+
+var light = new THREE.DirectionalLight(0xFFFFFF,1);
+light.position.set(-1,1,1);
+scene.add(light);
 
 var dtime;
 
 var pg = new Particle3System(scene);
-pg.gravity = -0.1;
+pg.gravity = g;
 function animate() {
-  var p = new Particle3(-10,-80,-50);
-  p.v = new THREE.Vector3(random(-0.3,0.3),1,random(-0.3,0.3))
-  pg.addParticle(p);
-  pg.update();
-  line.update();
+  if(dead){
+    alert("you are dead");
+    return;
+  }
+  if(win){
+    alert("you WON");
+    return;
+  }
   dtime = Date.now()-StartTime;
+  line.update();
   autoCam();
   if(!line.inAir){
     var geometry = new THREE.BoxGeometry(1,1,1);
@@ -167,7 +212,7 @@ function animate() {
     cube.scale.set(line.d.x,line.d.y,line.d.z);
     cube.position.set(line.p.x,line.p.y,line.p.z);
     cube.castShadow = true;
-    cube.receiveShadow = true;
+    cube.receiveShadow = false;
     scene.add(cube);
   }
   var hitP = 0;
@@ -180,7 +225,7 @@ function animate() {
     if(xin && yin && zin){
       b.hit = true;
       hitP++;
-      if(b.kill || !(l.p.y>b.p.y+b.d.y/2)){
+      if(b.kill || l.p.y+l.d.y<b.p.y+b.d.y/2){
         dead = true;
       }else{
         line.v.y = 0;

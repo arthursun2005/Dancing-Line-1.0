@@ -1,7 +1,7 @@
 function dist2(x1,y1,x2,y2){
 	return Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
 }
-function dist3(x1,y1,z1,x2,y2,z3){
+function dist3(x1,y1,z1,x2,y2,z2){
 	return Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2)+Math.pow(z2-z1,2));
 }
 function random(a, b){
