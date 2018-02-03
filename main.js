@@ -3,16 +3,16 @@ var container =
    document.querySelector('#container');
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(ww,hh);
+renderer.setPixelRatio( window.devicePixelRatio );
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 var camera = new THREE.PerspectiveCamera(75,ww/hh,1,1e10);
 var scene = new THREE.Scene();
-camera.position.set(0,900,0);
 scene.add(camera);
 
 var dead = false, win = false;
 const g = -0.015;
-var line = new Line(1,0.4);
+var line = new Line(1.2,0.4);
 scene.add(line.cube);
 
 const StartTime = Date.now();
@@ -113,39 +113,50 @@ joinBlock parameters:    b,direction,length,depth,width,changeInY,changeInD,f
 turnO parameters:        b,space,length,height,f
 addBlock parameters:     x,y,z,dx,dy,dz,f
 */
-var l1 = 30, w1 = 2, d1 = 20;
+var l1 = 30, w1 = 5, d1 = 20;
 var sy = -75;
 function f1(p){p.c = 0x110706;}
-function f2(p){p.c = 0x161206;p.kill = true;}
-function f3(p){p.c = 0x111111;p.kill = true;}
+function f2(p){p.c = 0x070401;p.kill = true;}
+function f3(p){
+  p.c = 0x080808;
+  p.kill = true;
+}
+function f4(p){p.c = 0x00FF00;}
 addBlock(0,sy-d1/2,-200,500,10,1000,f2);
-for(var i=0;i<50;i++){
+for(var i=0;i<30;i++){
   var x = random(-150,150);
   var z = random(-500,100);
   var dx = random(10,120);
-  var dy = random(5,25);
+  var dy = random(5,35);
   var dz = random(10,120);
   addBlock(x,sy-d1/2,z,dx,dy,dz,f3);
 }
 var step = {
-  up: function(){
+  up: function(n,l,d,w,h,z,f){
   },
-  down: function(){
+  down: function(n,l,d,w,h,z,f){
+    for(var i=0;i<n;i++){
+      joinBlock(blocks[blocks.length-1],0,l,d,w,h,z,f);
+    }
   }
 }
 addBlock(0,sy,-50,w1,d1,l1*3,f1);
 joinBlock(blocks[blocks.length-1],-1,l1,d1,w1,0,0,f1);
-joinBlock(blocks[blocks.length-1],1,l1,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],1,l1*2,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],-1,l1/8,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],1,l1/4,d1,w1,0,0,f1);
 joinBlock(blocks[blocks.length-1],-1,l1,d1,w1,0,0,f1);
 joinBlock(blocks[blocks.length-1],1,l1,d1,w1,0,0,f1);
-joinBlock(blocks[blocks.length-1],-1,l1,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],-1,l1/2,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],1,l1/8,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],-1,l1/4,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],1,l1/2,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],-1,l1/2,d1,w1,0,0,f1);
 joinBlock(blocks[blocks.length-1],1,l1,d1,w1,0,0,f1);
-joinBlock(blocks[blocks.length-1],-1,l1,d1,w1,0,0,f1);
-joinBlock(blocks[blocks.length-1],1,l1,d1,w1,0,0,f1);
-joinBlock(blocks[blocks.length-1],-1,l1,d1,w1,0,0,f1);
-joinBlock(blocks[blocks.length-1],1,l1,d1,w1,0,0,f1);
-joinBlock(blocks[blocks.length-1],-1,l1,d1,w1,0,0,f1);
-joinBlock(blocks[blocks.length-1],1,l1,d1,w1,0,0,f1);
+joinBlock(blocks[blocks.length-1],-1,l1/16,d1,w1/2,0,0,f1);
+joinBlock(blocks[blocks.length-1],1,l1/16,d1,w1/2,0,0,f1);
+joinBlock(blocks[blocks.length-1],-1,l1/16,d1,w1/2,0,0,f1);
+step.down(300,2,10,2,-0.2,3,f4);
 //////////////////////
 window.onmousedown = turn;
 window.ontouchstart = turn;
@@ -164,42 +175,25 @@ function autoCam(){
   camera.position.y = line.p.y+20;
 }
 
-var light = new THREE.DirectionalLight(0xFFFFFF,1);
-light.position.set(1,1,-1);
+var light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
 scene.add(light);
 
-var light = new THREE.PointLight(0xFFDDDD,1/2);
-light.position.set(-10,300,-300);
-
+var light = new THREE.PointLight(0xffffff,3,0,2);
+light.position.set(100,100,-50);
 light.castShadow = true;
-//light.shadowDarkness = 0.1;
-//light.shadowCameraVisible = true;
-
 scene.add(light);
-
-var light = new THREE.PointLight(0xFF9999,1/2);
-light.position.set(10,300,100);
-
-light.castShadow = true;
-//light.shadowDarkness = 0.1;
-//light.shadowCameraVisible = true;
-scene.add(light);
-
-var light = new THREE.DirectionalLight(0xFFFFFF,1);
-light.position.set(-1,1,1);
-scene.add(light);
-
 var dtime;
 
 var pg = new Particle3System(scene);
 pg.gravity = g;
+
 function animate() {
   if(dead){
-    alert("you are dead");
+    //alert("you are dead");
     return;
   }
   if(win){
-    alert("you WON");
+    //alert("you WON");
     return;
   }
   dtime = Date.now()-StartTime;
